@@ -1,7 +1,6 @@
 # PerHapS: Paired End Reads based HAPlotyping for Sequencing
-# PerHapS is a new and simple approach to directly call haplotypes from short-read, paired-end WES data
-
-# Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
+PerHapS is a new and simple approach to directly call haplotypes from short-read, paired-end WES data
+Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
 1. download UKB pre-phased genetic data
