@@ -88,7 +88,7 @@ done
 
 # #3. run the following code to piece together haplotypes from WES
 
-![Figure 1](./Pictures/Figure1.png)
+![Figure 1](./Pictures/Figure1.PNG)
 
 ```
 gendir=/mnt/d/projects/001UKB # the master directory that holds UKB genotic data
