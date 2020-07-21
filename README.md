@@ -16,38 +16,65 @@ Steps:
 ###. extract a certain genetic region such as APOE to save storage space
 
 dir=/restricted/projectnb/ukbiobank # based directory.
+
 pwd=`pwd`
+
 awk '{print $1,"23164_0_0"}' $dir/fe.fam | split -d -a 3 -l 100 - list
+
 cnt=0
+
 for dat in `ls list*`; do
-        let "cnt=$cnt+1"
-        let "gp=($cnt-1)/9"
-        let "gp2=$gp +1"
-        if [[ $gp2 == 1 ]]; then
-                qsub_str="-N g$gp2.$cnt"
-        else
-                qsub_str="-N g$gp2.$cnt -hold_jid g$gp.*"
-        fi
-        raw=${dat/list/raw}
-        outdir=$dir/BAM/$raw; mkdir -p $outdir
-        mv $pwd/$dat $outdir
-        echo "#!/bin/bash -l
-        echo -n > $dat.res.txt
-        module load samtools
-        sed 's/23164/23163/' $dat > $dat.2
-        ukbfetch -a$dir/files/ukb.key -b$dat
-        ukbfetch -a$dir/files/ukb.key -b$dat.2
-        for d in \`awk '{printf \" \"\$1}' $dat\`; do
-                mv \${d}_23163_0_0.cram \$d.cram
-                mv \${d}_23164_0_0.cram.crai \$d.cram.crai
-                samtools view -L $dir/files/apoe.b38.bed -O BAM -o \$d.bam \$d.cram; samtools index \$d.bam; rm \$d.cram*
-                samtools view -h \$d.bam | awk -v b=44908684 -v e=44908822 '{if (\$1~/^@/) print \$0; else if (\$1 in readname && pos[\$1]<=b && (\$4+76-1)>=e) print readname[\$1]\"\n\"\$0; readname[\$1]=\$0; pos[\$1]=\$4}' > \$d.tmp.sam
-                samtools sort \$d.tmp.sam -O BAM -o \$d.pairs.bam; samtools index \$d.pairs.bam; samtools view \$d.pairs.bam > \$d.pairs.sam
-                cat \$d.pairs.sam | awk '\$6==\"76M\" {if (\$1 in readname) print readname[\$1]\"\t|\t\"\$0; readname[\$1]=\$0}' | awk -v b=44908684 -v e=44908822 '{pos1=b-\$4+1; pos2=e-\$23+1; split(\$10,seq1,\"\"); split(\$29,seq2,\"\"); print seq1[pos1] \"-\" seq2[pos2]}' | sort | uniq -c | awk -v dat=$dat -v d=\$d '{print dat, d, \$2, \$1}' >> $dat.res.txt
+	
+	let "cnt=$cnt+1"        
+	
+	let "gp=($cnt-1)/9"
+        
+	let "gp2=$gp +1"
+        
+	if [[ $gp2 == 1 ]]; then
+        
+		qsub_str="-N g$gp2.$cnt"
+        
+	else
+                
+		qsub_str="-N g$gp2.$cnt -hold_jid g$gp.*"
+        
+	fi
+        
+	raw=${dat/list/raw}
+        
+	outdir=$dir/BAM/$raw; mkdir -p $outdir
+        
+	mv $pwd/$dat $outdir
+        
+	echo "#!/bin/bash -l
+        
+	echo -n > $dat.res.txt
+        
+	module load samtools
+        
+	sed 's/23164/23163/' $dat > $dat.2
+        
+	ukbfetch -a$dir/files/ukb.key -b$dat
+        
+	ukbfetch -a$dir/files/ukb.key -b$dat.2
+        
+	for d in \`awk '{printf \" \"\$1}' $dat\`; do
+        
+		mv \${d}_23163_0_0.cram \$d.cram
+        
+		mv \${d}_23164_0_0.cram.crai \$d.cram.crai
+                
+		samtools view -L $dir/files/apoe.b38.bed -O BAM -o \$d.bam \$d.cram; samtools index \$d.bam; rm \$d.cram*
+                
         done
-        " > $outdir/$dat.cmd
-        cd $outdir
-        qsub -P ukbiobank $qsub_str -o $dat.LOG -e $dat.ERR < $dat.cmd
+    
+    	" > $outdir/$dat.cmd
+        
+	cd $outdir
+        
+	qsub -P ukbiobank $qsub_str -o $dat.LOG -e $dat.ERR < $dat.cmd
+
 done
 
 
