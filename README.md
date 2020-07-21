@@ -9,6 +9,13 @@ Steps:
 
 # #1. download UKB pre-phased genetic data
 
+for chr in {1..22} X XY; do
+
+	ukbgene hap -c$chr
+
+	ukbgene hap -c$chr -m
+done
+
 
 # #2. download UKB WES data through looping
 
@@ -111,7 +118,9 @@ for dat in 2244305; do # 1466576
 	  
 	  awk -v d=$dat '{print d, $1, $3, $4, $22, $22-$4}' $dat.chr$chr.tmp.sam | sort -k 6n > $dat.chr$chr.pairs.len
 	  
-	  awk -v d=$dat -v b=$begin -v e=$end '{pos1=b-$4+1; pos2=e-$22+1; if (pos1>=1 && pos1<=76 && pos2>=1 && pos2<=76) { split($10,seq1,""); split($28,seq2,""); print d, seq1[pos1] "-" seq2[pos2]}}' $dat.tmp.sam > $dat.hap
+	  awk -v d=$dat -v b=$begin -v e=$end '{pos1=b-$4+1; pos2=e-$22+1; if (pos1>=1 && pos1<=76 && pos2>=1 && pos2<=76) \
+	  	
+		{ split($10,seq1,""); split($28,seq2,""); print d, seq1[pos1] "-" seq2[pos2]}}' $dat.tmp.sam > $dat.hap
   
   done
 
