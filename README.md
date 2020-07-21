@@ -7,20 +7,20 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 
 Steps:
 
-#1. download UKB pre-phased genetic data
+# #1. download UKB pre-phased genetic data
 
 
-#2. download UKB WES data through a look, extract a certain genetic region such as APOE to save storage space
+# #2. download UKB WES data through a look, extract a certain genetic region such as APOE to save storage space
 
 
-#3. run the following code to piece together haplotypes from WES
+# #3. run the following code to piece together haplotypes from WES
 
 gendir=/mnt/d/projects/001UKB # the master directory that holds UKB genotic data
 
 snps="rs429358 rs7412"
 chr=19; begin=44908684; end=44908822 # GRCh38 positions 
 
-### extract haplotype from phased data ###
+###. extract haplotype from phased data ###
 echo $snps | tr ' ' '\n' > snps.txt
 
 plink2 --pfile $gendir/hap/chr$chr --extract snps.txt --export vcf id-paste=iid bgz --out hap; tabix hap.vcf.gz
@@ -28,7 +28,7 @@ zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
 sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
 sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
 
-### piece haplotype based on paired end reads ###
+###. piece haplotype based on paired end reads ###
 
 echo -e "$chr\t$begin\t$end" > loc.bed
 
@@ -53,7 +53,5 @@ for dat in 2244305; do # 1466576
 done
 
 
-
-
-#4. run Perhaps.R and more analyses to explore the haplotypes
+# #4. run Perhaps.R and more analyses to explore the haplotypes
 
