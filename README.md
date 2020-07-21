@@ -29,8 +29,8 @@ sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
 sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
 
 ### piece haplotype based on paired end reads ###
-echo -e "$chr\t$begin\t$end" > loc.bed
-for dat in 2244305; do # 1466576
+> echo -e "$chr\t$begin\t$end" > loc.bed
+> for dat in 2244305; do # 1466576
   for chr in 20; do # {1..22}; do
     samtools view ${dat}_23183_0_0.cram chr$chr > $dat.chr$chr.sam # sometimes without "chr"
 	  awk '{print $9}' $dat.chr$chr.sam | sort -n > mate.len 
