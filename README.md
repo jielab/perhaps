@@ -8,19 +8,19 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 ![Figure 1](Figure1.png)
 ![Figure 2](Figure2.jpg)
 Steps:
-```
-# #1. download UKB pre-phased genetic data
 
+# #1. download UKB pre-phased genetic data
+```
 for chr in {1..22} X XY; do
 
 	ukbgene hap -c$chr
 
 	ukbgene hap -c$chr -m
 done
-
+```
 
 # #2. download UKB WES data through looping
-
+```
 ###. only submit 10 jobs each time, and each job downloading 100 samples.
 ###. extract a certain genetic region such as APOE to save storage space
 
@@ -85,10 +85,10 @@ for dat in `ls list*`; do
 	qsub -P ukbiobank $qsub_str -o $dat.LOG -e $dat.ERR < $dat.cmd
 
 done
-
+```
 
 # #3. run the following code to piece together haplotypes from WES
-
+```
 gendir=/mnt/d/projects/001UKB # the master directory that holds UKB genotic data
 
 snps="rs429358 rs7412"
@@ -127,8 +127,7 @@ for dat in 2244305; do # 1466576
   done
 
 done
-
+```
 
 # #4. run Perhaps.R and more analyses to explore the haplotypes
 
-```
