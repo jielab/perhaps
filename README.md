@@ -7,7 +7,8 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 
 # Steps:
 
-# #1. Download 1000 genomes sequencing data: start from 1000 genomes project main page https://www.internationalgenome.org. 
+# #1. Download 1000 genomes sequencing data
+start from 1000 genomes project main page https://www.internationalgenome.org. 
 Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
 Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
 The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples. 
