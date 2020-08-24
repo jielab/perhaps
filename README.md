@@ -64,7 +64,7 @@ awk '($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
-![Figure 1](./Pictures/Figure1.PNG)
+![Figure 1](./Pictures/Figure1S.JPG)
 
 
 
@@ -86,5 +86,5 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 
 # #5. run Perhaps.R and more analyses to explore the haplotypes
 
-![Figure 2](./Pictures/Figure2.jpg)
+![Figure 2](./Pictures/figure2.png)
 
