@@ -1,100 +1,77 @@
-# PerHapS: Paired End Reads based HAPlotyping for Sequencing
-PerHapS is a new and simple approach to directly call haplotypes from short-read, paired-end WES data
+# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data), is a new and simple approach to directly call haplotypes from short-read, paired-end Whole Exome Sequencing (WES) data. 
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
-The technical bottleneck in direct haplotype calling from short-read sequencing lies in the length of sequenced DNA fragments, often too short to include two or multiple variable nucleotide positions that define the haplotype of interest. Indeed, while sequencing reads length in UKBB WES data is 76bp, the two APOE SNPs (rs7412 and rs429358), defining the common APOE polymorphism, are located 138 bp apart. We pieced short reads by utilizing their labels to generate a composite haplotype longer than 138bp.
+The technical bottleneck in direct haplotype calling from short-read sequencing lies in the length of sequenced DNA fragments, often too short to include two or multiple variable nucleotide positions that define the haplotype of interest. Indeed, while sequencing reads length in UKBB WES data is 76bp, the two APOE SNPs (rs7412 and rs429358), defining the common APOE polymorphism, are located 138 bp apart. We pieced short reads by utilizing their labels to generate a composite haplotype longer than 138bp. For illustraton purpose, we downloaded the WES data of two samples: HG01173 NA20525.
 
 
 # Steps:
 
-# #1. download UKB pre-phased genetic data
+# #1. Download 1000 genomes sequencing data: start from 1000 genomes project main page https://www.internationalgenome.org. 
+Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
+Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
+The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples. 
+The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples. 
+Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
+
 ```
-for chr in {1..22} X XY; do
+# create a 2genes.bed file with the following two rows, tab separated.
+chr1    159204012       159206500       ACKR1
+chr19   44905781        44909393        APOE
 
-	ukbgene hap -c$chr
-
-	ukbgene hap -c$chr -m
-done
-```
-
-# #2. download UKB WES data through looping
-```
-###. only submit 10 jobs each time, and each job downloading 100 samples.
-###. extract a certain genetic region such as APOE to save storage space
-
-dir=/restricted/projectnb/ukbiobank # based directory.
-
-pwd=`pwd`
-
-awk '{print $1,"23164_0_0"}' $dir/fe.fam | split -d -a 3 -l 100 - list
-
-cnt=0
-
-for dat in `ls list*`; do
-	
-	let "cnt=$cnt+1"        
-	
-	let "gp=($cnt-1)/9"
-        
-	let "gp2=$gp +1"
-        
-	if [[ $gp2 == 1 ]]; then
-        
-		qsub_str="-N g$gp2.$cnt"
-        
-	else
-                
-		qsub_str="-N g$gp2.$cnt -hold_jid g$gp.*"
-        
-	fi
-        
-	raw=${dat/list/raw}
-        
-	outdir=$dir/BAM/$raw; mkdir -p $outdir
-        
-	mv $pwd/$dat $outdir
-        
-	echo "#!/bin/bash -l
-        
-	echo -n > $dat.res.txt
-        
-	module load samtools
-        
-	sed 's/23164/23163/' $dat > $dat.2
-        
-	ukbfetch -a$dir/files/ukb.key -b$dat
-        
-	ukbfetch -a$dir/files/ukb.key -b$dat.2
-        
-	for d in \`awk '{printf \" \"\$1}' $dat\`; do
-        
-		mv \${d}_23163_0_0.cram \$d.cram
-        
-		mv \${d}_23164_0_0.cram.crai \$d.cram.crai
-                
-		samtools view -L $dir/files/apoe.b38.bed -O BAM -o \$d.bam \$d.cram; samtools index \$d.bam; rm \$d.cram*
-                
-        done
-    
-    	" > $outdir/$dat.cmd
-        
-	cd $outdir
-        
-	qsub -P ukbiobank $qsub_str -o $dat.LOG -e $dat.ERR < $dat.cmd
-
-done
+# run SAMTOOLS to extract the two genomic regions and create a new 2gene.bam file
+samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
 ```
 
-# #3. run the following code to piece together haplotypes from WES
+# #2. run the following code to piece together haplotypes from WES
 
+```
+## only the first 3 lines need to be changed
+IID=HG01173 ## sample ID
+rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
+SNPs=1:159205564-159205704-159205737 ## the chr and positions of SNPs for directy haplotype detection.
+
+chr=${SNPs/:*/} # extract "chr" from the "SNPs" defined above 
+pos=${SNPs/*:/} # extract "positions" of the "SNPs" defined above 
+samtools view -O SAM -o $IID.sam $rawfile # convert the BAM/CRAM file to SAM format (txt format)   
+readlen=`awk 'NR==1 {printf length($10)}' $IID.sam`  # find the read length of the sequencing data
+
+# remove reads with soft sequencing, extract first 10 fields
+cut -f 1-10 $IID.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' > $IID.sam.paired 
+
+# sanity check of haplotype size range formed by paired reads
+awk '{if ($9<0) print -$9; else print $9}' $IID.sam.paired | uniq | sort -n | uniq  > hap.len 
+
+# this is the core script for PERHAPS
+awk -v readlen=$readlen -v c=$chr -v pos=$pos '$3=="chr"c {
+	printf NR" "$1 # print row number and the read name in the first column
+	split(pos,pa,"-"); # split the input positions into an array
+	for (i in pa) { # for each input SNP position
+		pos1=pa[i]-$4+1; pos2=pa[i]-$14+1; # the starting position of two read pairs are located in the 4th and 14th column, respectively
+		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf " SNP"i"-left|"seq1[pos1]}; # call the genotype intercepted by the read upstream (on the left) 
+		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf " SNP"i"-right|"seq2[pos2]}; # call the genotype intercepted by the read downstream (on the right)
+	};
+	print "" # write a newline
+}' $IID.sam.paired  > $IID.hap
+
+# report the number of haplotypes that meet certain critia, for example, those read pairs that overlap with SNP1 + SNP2, or more
+awk '($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=""; print $0}' $IID.hap | sort | uniq -c 
+
+```
+
+# #3. Visualize and validate the directly called haplotypes.
+
+Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
+ 
 ![Figure 1](./Pictures/Figure1.PNG)
 
-```
-gendir=/mnt/d/projects/001UKB # the master directory that holds UKB genotic data
 
+
+# #4. extract phased haplotypes from PGEN file (for UKB dataset)
+```
+gendir=XXX # the directory for the UKB haplotypes file
 snps="rs429358 rs7412"
-chr=19; begin=44908684; end=44908822 # GRCh38 positions 
+chr=19; begin=44908684; end=44908822 # GRCh38 positions for two SNPs that define the APOE haplotype
 
 ###. extract haplotype from phased data ###
 echo $snps | tr ' ' '\n' > snps.txt
@@ -104,34 +81,9 @@ zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
 sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
 sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
 
-###. piece haplotype based on paired end reads ###
-
-echo -e "$chr\t$begin\t$end" > loc.bed
-
-for dat in 2244305; do # 1466576
-  
-  for chr in 20; do # {1..22}; do
-    
-    samtools view ${dat}_23183_0_0.cram chr$chr > $dat.chr$chr.sam # sometimes without "chr"
-	  
-	  awk '{print $9}' $dat.chr$chr.sam | sort -n > mate.len 
-	  
-	  awk '$6=="151M" && NF==18 {$11="QQ"; if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' $dat.chr$chr.sam > $dat.chr$chr.tmp.sam
-	  
-	  awk 'NF !=36 || $4 > $22 {print NR, $4, $22}' $dat.chr$chr.tmp.sam | head # sanity check 
-	  
-	  awk -v d=$dat '{print d, $1, $3, $4, $22, $22-$4}' $dat.chr$chr.tmp.sam | sort -k 6n > $dat.chr$chr.pairs.len
-	  
-	  awk -v d=$dat -v b=$begin -v e=$end '{pos1=b-$4+1; pos2=e-$22+1; if (pos1>=1 && pos1<=76 && pos2>=1 && pos2<=76) \
-	  	
-		{ split($10,seq1,""); split($28,seq2,""); print d, seq1[pos1] "-" seq2[pos2]}}' $dat.tmp.sam > $dat.hap
-  
-  done
-
-done
 ```
 
-# #4. run Perhaps.R and more analyses to explore the haplotypes
+# #5. run Perhaps.R and more analyses to explore the haplotypes
 
 ![Figure 2](./Pictures/Figure2.jpg)
 
