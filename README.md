@@ -33,7 +33,7 @@ samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
 ```
 
 ## only the first 3 lines need to be changed
-IID=HG01173 ## sample ID
+IID=NA20525 ## sample ID
 rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
 SNPs=1:159205564-159205704-159205737 ## the chr and positions of SNPs for directy haplotype detection.
 
