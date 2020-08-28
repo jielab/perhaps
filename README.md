@@ -68,7 +68,7 @@ awk '($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
 
 # #3. Run PERHAPS on Windows
 
-We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.ext, uniq.ext are needed, which are put under the win-tools folder.
+We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the win-tools folder.
 
 ```
 import os
