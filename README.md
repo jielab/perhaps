@@ -66,7 +66,54 @@ awk '($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
 ```
 
 
-# #3. Visualize and validate the directly called haplotypes.
+# #3. Run PERHAPS on Windows
+
+We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.ext, uniq.ext are needed, which are put under the win-tools folder.
+
+```
+import os
+
+def cmd_res(cmd: str):
+    with os.popen(cmd) as p:
+        return p.read()
+
+def find_file(IID: str, dir: str):
+    file = '\\'.join([dir, IID])
+    if os.path.isfile(file + '.bam'):
+        os.system(rf".\tools\samtools view {file + '.bam'} > {IID}.sam")
+    elif os.path.isfile(file + '.sam'):
+        os.system(rf"copy {file + '.sam'} {IID}.sam")
+    else:
+        raise Exception('File not find!')
+
+def process(IID: str, rawfile: str, SNPs: str):
+    [Chr, pos] = SNPs.split(':')
+    os.system(rf'.\tools\samtools view {rawfile} > {IID}.sam')
+    readlen = cmd_res(r'.\tools\awk "NR==1 {printf length($10)}" %s.sam' % IID).strip()
+
+    os.system(r'.\tools\cut -f 1-10 %s.sam | '
+              r'.\tools\awk "$6 !~/S/ {if ($1 in reads) print reads[$1]\" \"$0; reads[$1]=$0}" '
+              '> %s.sam.paired' % (IID, IID))
+
+    os.system(r'.\tools\awk "{if ($9<0) print -$9; else print $9}" %s.sam.paired'
+              r' | .\tools\uniq | .\tools\sort -n | .\tools\uniq  > hap.len' % IID)
+
+    os.system(r'.\tools\awk -v readlen=%s -v c=%s -v pos=%s -f main_process.awk'
+              r' %s.sam.paired  > %s.hap' % (readlen, Chr, pos, IID, IID))
+
+    os.system(r'.\tools\awk "($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=\"\"; print $0}" %s.hap '
+              r'| .\tools\sort | .\tools\uniq -c' % IID)
+
+if __name__ == '__main__':
+    IID = 'NA20525'  ## sample ID
+    rawfile = rf'.\test-data\{IID}.bam'  ## the location of the BAM or CRAM file, indexed
+    SNPs = '1:159205564-159205704-159205737'  ## the chr and positions of SNPs for directy haplotype detection.
+    process(IID, rawfile, SNPs)
+
+```
+
+
+# #4. Visualize and validate the directly called haplotypes.
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
@@ -74,7 +121,7 @@ Researchers could then open IGV (http://www.igv.org/) to visualize the genomic r
 
 
 
-# #4. extract phased haplotypes from PGEN file (for UKB dataset)
+# #5. extract phased haplotypes from PGEN file (for UKB dataset)
 
 ```
 gendir=XXX # the directory for the UKB haplotypes file
@@ -92,13 +139,13 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 ```
 
 
-# #5. run Perhaps.R and more analyses to explore the haplotypes
+# #6. run Perhaps.R and more analyses to explore the haplotypes
 
 ![Figure 2](./Pictures/figure2.png)
 
 
 
-# #6. download and extract ~50,000 WES data (for UKB dataset)
+# #7. download and extract ~50,000 WES data (for UKB dataset)
 the UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
 Then we use LSF to run 9 ukbgene jobs in a batch, and put the other jobs in batches of 9 jobs, and waiting on the queue.
@@ -149,49 +196,3 @@ done
 
 ```
 
-
-# #7. Windows Version
-
-We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.ext, uniq.ext are needed, which are put under the win-tools folder.
-
-```
-import os
-
-def cmd_res(cmd: str):
-    with os.popen(cmd) as p:
-        return p.read()
-
-def find_file(IID: str, dir: str):
-    file = '\\'.join([dir, IID])
-    if os.path.isfile(file + '.bam'):
-        os.system(rf".\tools\samtools view {file + '.bam'} > {IID}.sam")
-    elif os.path.isfile(file + '.sam'):
-        os.system(rf"copy {file + '.sam'} {IID}.sam")
-    else:
-        raise Exception('File not find!')
-
-def process(IID: str, rawfile: str, SNPs: str):
-    [Chr, pos] = SNPs.split(':')
-    os.system(rf'.\tools\samtools view {rawfile} > {IID}.sam')
-    readlen = cmd_res(r'.\tools\awk "NR==1 {printf length($10)}" %s.sam' % IID).strip()
-
-    os.system(r'.\tools\cut -f 1-10 %s.sam | '
-              r'.\tools\awk "$6 !~/S/ {if ($1 in reads) print reads[$1]\" \"$0; reads[$1]=$0}" '
-              '> %s.sam.paired' % (IID, IID))
-
-    os.system(r'.\tools\awk "{if ($9<0) print -$9; else print $9}" %s.sam.paired'
-              r' | .\tools\uniq | .\tools\sort -n | .\tools\uniq  > hap.len' % IID)
-
-    os.system(r'.\tools\awk -v readlen=%s -v c=%s -v pos=%s -f main_process.awk'
-              r' %s.sam.paired  > %s.hap' % (readlen, Chr, pos, IID, IID))
-
-    os.system(r'.\tools\awk "($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=\"\"; print $0}" %s.hap '
-              r'| .\tools\sort | .\tools\uniq -c' % IID)
-
-if __name__ == '__main__':
-    IID = 'NA20525'  ## sample ID
-    rawfile = rf'.\test-data\{IID}.bam'  ## the location of the BAM or CRAM file, indexed
-    SNPs = '1:159205564-159205704-159205737'  ## the chr and positions of SNPs for directy haplotype detection.
-    process(IID, rawfile, SNPs)
-
-```
