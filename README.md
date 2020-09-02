@@ -28,7 +28,7 @@ samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
 ```
 
 
-# #2. run the following code to piece together haplotypes from WES
+# #2. LINUX version of PERHAPS
 
 ```
 
@@ -50,23 +50,31 @@ awk '{if ($9<0) print -$9; else print $9}' $IID.sam.paired | uniq | sort -n | un
 
 # this is the core script for PERHAPS
 awk -v readlen=$readlen -v c=$chr -v pos=$pos '$3=="chr"c {
-	printf NR" "$1 # print row number and the read name in the first column
-	split(pos,pa,"-"); # split the input positions into an array
-	for (i in pa) { # for each input SNP position
-		pos1=pa[i]-$4+1; pos2=pa[i]-$14+1; # the starting position of two read pairs are located in the 4th and 14th column, respectively
-		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf " SNP"i"-left|"seq1[pos1]}; # call the genotype intercepted by the read upstream (on the left) 
-		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf " SNP"i"-right|"seq2[pos2]}; # call the genotype intercepted by the read downstream (on the right)
+	printf NR" "$1" "
+	split(pos,pa,"-");
+	cnt=0; hap="";
+	for (i in pa) {
+		pos1=pa[i]-$4+1; pos2=pa[i]-$14+1;
+		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf "-SNP"i"-left("seq1[pos1]")" };
+		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf "-SNP"i"-right("seq2[pos2]")" };
+		if ((pos1>=1 && pos1<=readlen) || (pos2>=1 && pos2<=readlen)) cnt++; else printf "<>NA"
 	};
-	print "" # write a newline
-}' $IID.sam.paired  > $IID.hap
+	print " "cnt
+}' $IID.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $IID.hap
 
-# report the number of haplotypes that meet certain critia, for example, those read pairs that overlap with SNP1 + SNP2, or more
-awk '($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=""; print $0}' $IID.hap | sort | uniq -c 
+
+# report the haplotypes that include all input SNPs
+num=`echo $SNPs |  awk '{print gsub("-","") +1}'`
+awk -v num=$num '$NF==num {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
+
+# create a subset SAM file that only includes the reads that form the haplotype mentioned above, for IGV visualization
+awk -v num=$num '$NF==num {print $2}' $IID.hap > $IID.subset.reads
+fgrep -wf $IID.subset.reads $IID.sam > $IID.subset.sam
 
 ```
 
 
-# #3. Run PERHAPS on Windows
+# #3. Windows Version of PERHAPS
 
 We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
 To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
@@ -114,7 +122,17 @@ if __name__ == '__main__':
 ```
 
 
-# #4. Visualize and validate the directly called haplotypes.
+# #4. GUI version of PERHAPS.
+
+After putting windows_tools directory in the same directory, then click perhaps.exe to open the GUI version.
+The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
+Below are the screenshots of the GUI version.
+ 
+![Figure 1](./Pictures/Figure1S.JPG)
+
+
+
+# #5. Visualize and validate the directly called haplotypes.
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
@@ -122,7 +140,7 @@ Researchers could then open IGV (http://www.igv.org/) to visualize the genomic r
 
 
 
-# #5. extract phased haplotypes from PGEN file (for UKB dataset)
+# #6. extract phased haplotypes from PGEN file (for UKB dataset)
 
 ```
 gendir=XXX # the directory for the UKB haplotypes file
