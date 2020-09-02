@@ -124,11 +124,13 @@ if __name__ == '__main__':
 
 # #4. GUI version of PERHAPS.
 
-After putting windows_tools directory in the same directory, then click perhaps.exe to open the GUI version.
+After putting windows_tools directory in the same directory, then click perhaps.gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
-![Figure 1](./Pictures/Figure1S.JPG)
+![Figure 1](./Pictures/windows_1.png)
+
+![Figure 2](./Pictures/windows_1.png)
 
 
 
@@ -136,7 +138,7 @@ Below are the screenshots of the GUI version.
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
-![Figure 1](./Pictures/Figure1S.JPG)
+![Figure 3](./Pictures/Figure1S.JPG)
 
 
 
@@ -158,13 +160,13 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 ```
 
 
-# #6. run Perhaps.R and more analyses to explore the haplotypes
+# #7. run Perhaps.R and more analyses to explore the haplotypes
 
-![Figure 2](./Pictures/figure2.png)
+![Figure 4](./Pictures/figure2.png)
 
 
 
-# #7. download and extract ~50,000 WES data (for UKB dataset)
+# #8. download and extract ~50,000 WES data (for UKB dataset)
 the UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
 Then we use LSF to run 9 ukbgene jobs in a batch, and put the other jobs in batches of 9 jobs, and waiting on the queue.
