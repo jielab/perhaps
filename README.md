@@ -79,48 +79,6 @@ fgrep -wf $IID.subset.reads $IID.sam > $IID.subset.sam
 We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
 To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
 
-```
-import os
-
-def cmd_res(cmd: str):
-    with os.popen(cmd) as p:
-        return p.read()
-
-def find_file(IID: str, dir: str):
-    file = '\\'.join([dir, IID])
-    if os.path.isfile(file + '.bam'):
-        os.system(rf".\tools\samtools view {file + '.bam'} > {IID}.sam")
-    elif os.path.isfile(file + '.sam'):
-        os.system(rf"copy {file + '.sam'} {IID}.sam")
-    else:
-        raise Exception('File not find!')
-
-def process(IID: str, rawfile: str, SNPs: str):
-    [Chr, pos] = SNPs.split(':')
-    os.system(rf'.\tools\samtools view {rawfile} > {IID}.sam')
-    readlen = cmd_res(r'.\tools\awk "NR==1 {printf length($10)}" %s.sam' % IID).strip()
-
-    os.system(r'.\tools\cut -f 1-10 %s.sam | '
-              r'.\tools\awk "$6 !~/S/ {if ($1 in reads) print reads[$1]\" \"$0; reads[$1]=$0}" '
-              '> %s.sam.paired' % (IID, IID))
-
-    os.system(r'.\tools\awk "{if ($9<0) print -$9; else print $9}" %s.sam.paired'
-              r' | .\tools\uniq | .\tools\sort -n | .\tools\uniq  > hap.len' % IID)
-
-    os.system(r'.\tools\awk -v readlen=%s -v c=%s -v pos=%s -f main_process.awk'
-              r' %s.sam.paired  > %s.hap' % (readlen, Chr, pos, IID, IID))
-
-    os.system(r'.\tools\awk "($0 ~/SNP1/ && $0~/SNP2/) {$1=$2=\"\"; print $0}" %s.hap '
-              r'| .\tools\sort | .\tools\uniq -c' % IID)
-
-if __name__ == '__main__':
-    IID = 'NA20525'  ## sample ID
-    rawfile = rf'.\test-data\{IID}.bam'  ## the location of the BAM or CRAM file, indexed
-    SNPs = '1:159205564-159205704-159205737'  ## the chr and positions of SNPs for directy haplotype detection.
-    process(IID, rawfile, SNPs)
-
-```
-
 
 # #4. GUI version of PERHAPS.
 
@@ -128,11 +86,11 @@ After putting windows_tools directory in the same directory, then click perhaps.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
-![Figure 1](./Pictures/windows_1.png)
+![Figure 1](./Pictures/gui_1.png)
 
-![Figure 2](./Pictures/windows_1.png)
+![Figure 2](./Pictures/gui_2.png)
 
-
+![Figure 3](./Pictures/gui_3.png)
 
 # #5. Visualize and validate the directly called haplotypes.
 
