@@ -95,7 +95,7 @@ Below are the screenshots of the GUI version.
 ![Figure 3](./Pictures/gui_3.png)
 
 
-!! If users could not see pictures here,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
+!! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
 
 
 # #5. Visualize and validate the directly called haplotypes.
