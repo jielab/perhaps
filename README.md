@@ -82,7 +82,9 @@ To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:1
 
 # #4. GUI version of PERHAPS.
 
-After putting windows_tools directory in the same directory, then click perhaps.gui.exe to run the GUI version.
+First, download perhaps_gui.exe and windows_tools directory. 
+Then, put them in the same directory (not putting perhaps_gui.exe into the windows_tools directory)
+Then, click perhaps_gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
@@ -91,6 +93,10 @@ Below are the screenshots of the GUI version.
 ![Figure 2](./Pictures/gui_2.png)
 
 ![Figure 3](./Pictures/gui_3.png)
+
+
+!! If users could not see pictures here,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
+
 
 # #5. Visualize and validate the directly called haplotypes.
 
