@@ -106,7 +106,7 @@ Researchers could then open IGV (http://www.igv.org/) to visualize the genomic r
 
 
 
-# #6. extract phased haplotypes from PGEN file (for UKB dataset)
+# #6. Extract statistically phased haplotypes from UKB
 
 ```
 gendir=XXX # the directory for the UKB haplotypes file
@@ -124,14 +124,17 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 ```
 
 
-# #7. run Perhaps.R and more analyses to explore the haplotypes
+# #7. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
+
+Run perhaps.R to generate the following plot
 
 ![Figure 4](./Pictures/figure2.png)
 
 
 
-# #8. download and extract ~50,000 WES data (for UKB dataset)
-the UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
+# #8. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
+
+The UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
 Then we use LSF to run 9 ukbgene jobs in a batch, and put the other jobs in batches of 9 jobs, and waiting on the queue.
 To save disk space, we delete the downloaded raw genotypic data after extracting the target regions.
