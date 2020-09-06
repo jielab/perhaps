@@ -1,4 +1,4 @@
-# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data), is a new and simple approach to directly call haplotypes from short-read, paired-end Whole Exome Sequencing (WES) data. 
+# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data), is a new and simple approach to directly call haplotypes from short-read, paired-end next generation sequencing data. 
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
