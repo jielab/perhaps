@@ -80,7 +80,7 @@ We also developed a script that could be run on Windows OS. The tools including 
 To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
 
 
-# #4. GUI version of PERHAPS.
+# #4. GUI version of PERHAPS
 
 First, download perhaps_gui.exe and windows_tools directory. 
 Then, put them in the same directory (not putting perhaps_gui.exe into the windows_tools directory)
@@ -98,7 +98,7 @@ Below are the screenshots of the GUI version.
 !! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
 
 
-# #5. Visualize and validate the directly called haplotypes.
+# #5. Visualize and validate the directly called haplotypes
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
