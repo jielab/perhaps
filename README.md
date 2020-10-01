@@ -1,4 +1,5 @@
-# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data), is a new and simple approach to directly call haplotypes from short-read, paired-end next generation sequencing data. 
+# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data)
+A new and simple approach to directly call haplotypes from short-read, paired-end next generation sequencing data. 
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
@@ -8,31 +9,56 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 
 # Steps:
 
-# #1. Download 1000 genomes sequencing data
-start from 1000 genomes project main page https://www.internationalgenome.org. 
-Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
-Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
-The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples. 
-The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples. 
-Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
-
+# #1. define two genomic region of interest and download sequencing data
+```
+echo "1 159204012 159206500 ACKR1" > loc.bed
+echo "19 44905781 44909393 APOE" >> loc.bed
+sed -i 's/ /\t/g' loc.bed
 ```
 
-# create a 2genes.bed file with the following two rows, tab separated.
-chr1    159204012       159206500       ACKR1
-chr19   44905781        44909393        APOE
+#1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
+```
+echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
+ukbfetch -bsample.id
+samtools index 1466576.cram
+samtools view -L loc.bed -O BAM -o 1466576.loc.bed 1466576.cram
+```
 
-# run SAMTOOLS to extract the two genomic regions and create a new 2gene.bam file
-samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
+#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype, https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, 
+```
+wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/NA20525.final.cram
+samtools index NA20525.final.cram
+samtools view -L loc.bed -O BAM -o NA20525.loc.bam NA20525.final.cram
+```
 
+#1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap. 
+```
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
+bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+echo "NA20525" > sample.keep
+plink2 --vcf chr1.vcf.gz --extract bed0 loc.bed --keep sample.keep --export vcf bgz --out NA20525
 ```
 
 
-# #2. LINUX version of PERHAPS
-
+# #2. test other software
+#2.1 whatshap https://whatshap.readthedocs.io/en/latest/
+```
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda install whatshap nomkl
+whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
 ```
 
-## only the first 3 lines need to be changed
+#2.2 HapCUT2: https://github.com/vibansal/HapCUT2
+```
+./build/extractHAIRS [options] --bam reads.sorted.bam --VCF variants.vcf --out fragment_file
+./build/HAPCUT2 --fragments fragment_file --VCF variants.vcf --output haplotype_output_file
+```
+
+
+# #2. PerHAPS in LINUX, only the first 3 lines need to be changed
+```
 IID=NA20525 ## sample ID
 rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
 SNPs=1:159205564-159205704-159205737 ## the chr and positions of SNPs for directy haplotype detection.
