@@ -24,7 +24,8 @@ samtools index 1466576.cram
 samtools view -L loc.bed -O BAM -o 1466576.loc.bed 1466576.cram
 ```
 
-#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype, https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, 
+#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
+#full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, 
 ```
 wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/NA20525.final.cram
 samtools index NA20525.final.cram
