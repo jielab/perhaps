@@ -9,7 +9,7 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 
 # Steps:
 
-# #1. define two genomic region of interest and download sequencing data
+# #1. download sequencing data and extract regions of interest
 ```
 echo "1 159204012 159206500 ACKR1" > loc.bed
 echo "19 44905781 44909393 APOE" >> loc.bed
