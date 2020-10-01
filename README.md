@@ -18,6 +18,7 @@ sed -i 's/ /\t/g' loc.bed
 
 #1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
 ```
+echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
 echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
 ukbfetch -bsample.id
 samtools index 1466576.cram
