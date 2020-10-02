@@ -1,4 +1,4 @@
-# PerHAPS (Paired-End Reads based HAPlotyping from Sequencing data)
+# PerHAPS (Paired-End Reads based HAPlotyping for Sequencing)
 A new and simple approach to directly call haplotypes from short-read, paired-end next generation sequencing data. 
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
