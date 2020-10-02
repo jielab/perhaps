@@ -22,7 +22,7 @@ echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key
 echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
 ukbfetch -bsample.id
 samtools index 1466576.cram
-samtools view -L loc.bed -O BAM -o 1466576.loc.bed 1466576.cram
+samtools view -L loc.bed -O BAM -o 1466576.loc.bam 1466576.cram
 ```
 
 #1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
@@ -56,6 +56,12 @@ whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
 ```
 ./build/extractHAIRS [options] --bam reads.sorted.bam --VCF variants.vcf --out fragment_file
 ./build/HAPCUT2 --fragments fragment_file --VCF variants.vcf --output haplotype_output_file
+```
+
+#2.3 Smart-Phase: https://github.com/paulhager/smart-phase
+```
+java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.bed \
+ -m 60 -x -t -vcf -c 0.1 -o NA20525.tsv
 ```
 
 
