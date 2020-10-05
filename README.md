@@ -22,15 +22,16 @@ sed -i 's/ /\t/g' subset.bed
 echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
 echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
 ukbfetch -bsample.id
-samtools view -L subset.bed -O BAM -o 1466576.loc.bam 1466576.cram
+samtools view -L subset.bed -O BAM -o 1466576.subset.bam 1466576.cram
 ```
 
 #1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
 #full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
 ```
-wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/NA20525.final.cram
-samtools index NA20525.final.cram
-samtools view -L loc.bed -O BAM -o NA20525.loc.bam NA20525.final.cram
+dat=NA20525
+wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$dat.final.cram
+samtools index $dat.final.cram
+samtools view -L subset.bed -O BAM -o $dat.subset.bam $dat.final.cram
 ```
 
 #1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap. 
@@ -39,7 +40,7 @@ wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_s
 seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
 bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
 echo "NA20525" > sample.keep
-plink2 --vcf chr1.vcf.gz --extract bed0 loc.bed --keep sample.keep --export vcf bgz --out NA20525
+plink2 --vcf chr1.vcf.gz --extract bed0 subset.bed --keep sample.keep --export vcf bgz --out NA20525
 ```
 
 
