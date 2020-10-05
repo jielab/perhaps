@@ -11,8 +11,7 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 
 # #1. download sequencing data and extract regions of interest
 ```
-the first column of the loc.bed file might need to start with "chr", in order to extract the regions of a certain BAM file. 
-use "samtools view -H XXX.bam" to check if a certain BAM file has "chr" prefix.
+samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
 echo "1 159204012 159206500 ACKR1" > loc.bed
 echo "19 44905781 44909393 APOE" >> loc.bed
 sed -i 's/ /\t/g' loc.bed
