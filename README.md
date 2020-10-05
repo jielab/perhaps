@@ -22,7 +22,6 @@ sed -i 's/ /\t/g' loc.bed
 echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
 echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
 ukbfetch -bsample.id
-samtools index 1466576.cram
 samtools view -L loc.bed -O BAM -o 1466576.loc.bam 1466576.cram
 ```
 
