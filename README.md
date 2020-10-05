@@ -14,7 +14,7 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
 echo "1 159204012 159206500 ACKR1" > subset.bed
 echo "19 44905781 44909393 APOE" >> subset.bed
-sed -i 's/ /\t/g' loc.bed
+sed -i 's/ /\t/g' subset.bed
 ```
 
 #1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
