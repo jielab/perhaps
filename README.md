@@ -65,8 +65,10 @@ whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
 
 #2.2 HapCUT2: https://github.com/vibansal/HapCUT2
 ```
-./build/extractHAIRS [options] --bam reads.sorted.bam --VCF variants.vcf --out fragment_file
-./build/HAPCUT2 --fragments fragment_file --VCF variants.vcf --output haplotype_output_file
+id=NA20525
+HapCUT2/build/extractHAIRS --bam $id.wgs.subset.bam --VCF $id.vcf  --out $id.fragment
+HapCUT2/build/HAPCUT2 --fragments $id.fragment --VCF $id.vcf --output $id.hap
+
 ```
 
 #2.3 Smart-Phase: https://github.com/paulhager/smart-phase
