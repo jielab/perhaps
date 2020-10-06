@@ -20,10 +20,13 @@ echo "rs2814778 rs12075 rs34599082 rs13962 rs429358 rs7412" | tr ' ' '\n' > subs
 
 #1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
 ```
+id=1466576
 echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
-echo -e "1466576 23163_0_0\n1466576 23164_0_0" > sample.id
+echo -e "$id 23163_0_0\n1466576 23164_0_0" > sample.id
 ukbfetch -bsample.id
-samtools view -L subset.bed -O BAM -o 1466576.subset.bam 1466576.cram
+samtools view -L subset.bed -O BAM -o $id.subset.bam $id.cram
+samtools addreplacerg -r ID:$id -r SM:$id -O BAM -o $id.bam $id.subset.bam
+samtools index -o $id.bam
 ```
 
 #1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
