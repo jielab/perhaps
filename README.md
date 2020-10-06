@@ -15,6 +15,7 @@ samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file
 echo "1 159204012 159206500 ACKR1" > subset.bed
 echo "19 44905781 44909393 APOE" >> subset.bed
 sed -i 's/ /\t/g' subset.bed
+echo "rs2814778 rs12075 rs34599082 rs13962 rs429358 rs7412" | tr ' ' '\n' > subset.snps
 ```
 
 #1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
@@ -40,7 +41,7 @@ wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_s
 seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
 bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
 echo "NA20525" > sample.keep
-plink2 --vcf chr1.vcf.gz --extract bed0 subset.bed --keep sample.keep --export vcf bgz --out NA20525
+plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
 ```
 
 
