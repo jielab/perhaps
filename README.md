@@ -32,19 +32,25 @@ samtools index -o $id.bam
 #1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
 #full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
 ```
-dat=NA20525
-wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$dat.final.cram
-samtools index $dat.final.cram
-samtools view -L subset.bed -O BAM -o $dat.subset.bam $dat.final.cram
+id=NA20525
+wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$id.final.cram
+samtools index $id.final.cram
+samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 ```
 
 #1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap. 
+#the following code uses chromosome 1 as an example.
 ```
 wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
 seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
+# rename chromosome to add "chr" prefix, if needed
 bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+# convert from build 37 positions to build 38 positions, if needed
+gatk LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz -C hg19ToHg38.over.chain --REJECT rejected.vcf
+# create a small VCF subset, keeping only those samples of interest.
 echo "NA20525" > sample.keep
 plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
+
 ```
 
 
