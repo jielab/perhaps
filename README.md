@@ -46,7 +46,7 @@ seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
 # rename chromosome to add "chr" prefix, if needed
 bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
 # convert from build 37 positions to build 38 positions, if needed
-gatk LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz -C hg19ToHg38.over.chain --REJECT rejected.vcf
+gatk LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz -C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
 # create a small VCF subset, keeping only those samples of interest.
 echo "NA20525" > sample.keep
 plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
