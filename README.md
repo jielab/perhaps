@@ -110,17 +110,18 @@ cut -f 1-10 $IID.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; rea
 awk '{if ($9<0) print -$9; else print $9}' $IID.sam.paired | uniq | sort -n | uniq  > hap.len 
 
 # this is the core script for PERHAPS
-awk -v readlen=$readlen -v pos=$pos { \
-	printf NR" "$1" "; \
-	split(pos,pa,"-"); \
-	cnt=0; hap=""; \
-	for (i in pa) { \
-		pos1=pa[i]-$4+1; pos2=pa[i]-$14+1; \
-		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf "-SNP"i"-left("seq1[pos1]")" }; \
-		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf "-SNP"i"-right("seq2[pos2]")" }; \
-		if ((pos1>=1 && pos1<=readlen) || (pos2>=1 && pos2<=readlen)) cnt++; else printf "<>NA" \
-	}; \
-	print " "cnt \
+awk -v readlen=$readlen -v pos=$pos '{
+	printf NR" "$1" ";
+	split(pos,pa,"-");
+	cnt=0; hap="";
+	for (i in pa) {
+		pos1=pa[i]-$4+1; 
+		pos2=pa[i]-$14+1;
+		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf "-SNP"i"-left("seq1[pos1]")" };
+		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf "-SNP"i"-right("seq2[pos2]")" };
+		if ((pos1>=1 && pos1<=readlen) || (pos2>=1 && pos2<=readlen)) cnt++; else printf "<>NA"
+	};
+	print " "cnt
 }' $IID.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $IID.hap
 
 
