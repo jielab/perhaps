@@ -10,6 +10,7 @@ The technical bottleneck in direct haplotype calling from short-read sequencing 
 # Steps:
 
 # #1. download sequencing data and extract regions of interest
+
 ```
 samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
 echo "1 159204012 159206500 ACKR1" > subset.bed
@@ -19,6 +20,7 @@ echo "rs2814778 rs12075 rs34599082 rs13962 rs429358 rs7412" | tr ' ' '\n' > subs
 ```
 
 #1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
+
 ```
 id=1466576
 echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
@@ -31,6 +33,7 @@ samtools index -o $id.bam
 
 #1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
 #full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
+
 ```
 id=NA20525
 wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$id.final.cram
@@ -40,13 +43,19 @@ samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 
 #1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap. 
 #the following code uses chromosome 1 as an example.
+
 ```
 wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+mv ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz chr1.vcf.gz
 seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
+
 # rename chromosome to add "chr" prefix, if needed
-bcftools annotate ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+bcftools annotate chr1.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+
 # convert from build 37 positions to build 38 positions, if needed
-gatk LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz -C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
+gatk --java-options "-Xmx6g" LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz \
+	-C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
+
 # create a small VCF subset, keeping only those samples of interest.
 echo "NA20525" > sample.keep
 plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
@@ -56,6 +65,7 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 # #2. test other software
 #2.1 whatshap https://whatshap.readthedocs.io/en/latest/
+
 ```
 conda config --add channels bioconda
 conda config --add channels conda-forge
@@ -64,6 +74,7 @@ whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
 ```
 
 #2.2 HapCUT2: https://github.com/vibansal/HapCUT2
+
 ```
 id=NA20525
 HapCUT2/build/extractHAIRS --bam $id.wgs.subset.bam --VCF $id.vcf  --out $id.fragment
@@ -72,6 +83,7 @@ HapCUT2/build/HAPCUT2 --fragments $id.fragment --VCF $id.vcf --output $id.hap
 ```
 
 #2.3 Smart-Phase: https://github.com/paulhager/smart-phase
+
 ```
 java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.bed \
  -m 60 -x -t -vcf -c 0.1 -o NA20525.tsv
@@ -79,6 +91,7 @@ java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.
 
 
 # #2. PerHAPS in LINUX, only the first 3 lines need to be changed
+
 ```
 IID=NA20525 ## sample ID
 rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
