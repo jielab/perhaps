@@ -74,7 +74,7 @@ whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
 ```
 
 #2.2 HapCUT2: https://github.com/vibansal/HapCUT2
-
+#! the VCF and BAM files need to be on the same genome build (such as GRCh38)
 ```
 id=NA20525
 HapCUT2/build/extractHAIRS --bam $id.wgs.subset.bam --VCF $id.vcf  --out $id.fragment
