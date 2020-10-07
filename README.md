@@ -95,12 +95,12 @@ java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.
 
 ```
 IID=NA20525 ## sample ID
-rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
+bamfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
 SNPs=1:159205564-159205704-159205737 ## the chr and positions of SNPs for directy haplotype detection.
 
 chr=${SNPs/:*/} # extract "chr" from the "SNPs" defined above 
 pos=${SNPs/*:/} # extract "positions" of the "SNPs" defined above 
-samtools view -O SAM -o $IID.sam $rawfile chr$chr # extract the specified CHR and convert to SAM format   
+samtools view -O SAM -o $IID.sam $bamfile chr$chr # extract the specified CHR and convert to SAM format   
 readlen=`awk 'NR==1 {printf length($10)}' $IID.sam`  # find the read length of the sequencing data
 
 # remove reads with soft sequencing, extract first 10 fields
