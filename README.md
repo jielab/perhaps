@@ -100,14 +100,14 @@ SNPs=19:44908684-44908822 ## the chr and positions of SNPs for phasing.
 
 chr=${SNPs/:*/} # extract "chr" from the "SNPs" defined above 
 pos=${SNPs/*:/} # extract "positions" of the "SNPs" defined above 
-samtools view -O SAM -o $IID.sam $bamfile chr$chr # extract the specified CHR and convert to SAM format   
-readlen=`awk 'NR==1 {printf length($10)}' $IID.sam`  # find the read length of the sequencing data
+samtools view -O SAM -o $id.sam $bamfile chr$chr # extract the specified CHR and convert to SAM format   
+readlen=`awk 'NR==1 {printf length($10)}' $id.sam`  # find the read length of the sequencing data
 
 # remove reads with soft sequencing, extract first 10 fields
-cut -f 1-10 $IID.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' > $IID.sam.paired 
+cut -f 1-10 $id.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' > $id.sam.paired 
 
 # sanity check of haplotype size range formed by paired reads
-awk '{if ($9<0) print -$9; else print $9}' $IID.sam.paired | uniq | sort -n | uniq  > hap.len 
+awk '{if ($9<0) print -$9; else print $9}' $id.sam.paired | uniq | sort -n | uniq  > hap.len 
 
 # this is the core script for PERHAPS
 awk -v readlen=$readlen -v pos=$pos '{
@@ -122,16 +122,16 @@ awk -v readlen=$readlen -v pos=$pos '{
 		if ((pos1>=1 && pos1<=readlen) || (pos2>=1 && pos2<=readlen)) cnt++; else printf "<>NA"
 	};
 	print " "cnt
-}' $IID.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $IID.hap
+}' $id.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $id.hap
 
 
 # report the haplotypes that include all input SNPs
 num=`echo $SNPs |  awk '{print gsub("-","") +1}'`
-awk -v num=$num '$NF==num {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
+awk -v num=$num '$NF==num {$1=$2=""; print $0}' $id.hap | sort | uniq -c
 
 # create a subset SAM file that only includes the reads that form the haplotype mentioned above, for IGV visualization
-awk -v num=$num '$NF==num {print $2}' $IID.hap > $IID.subset.reads
-fgrep -wf $IID.subset.reads $IID.sam > $IID.subset.sam
+awk -v num=$num '$NF==num {print $2}' $id.hap > $id.subset.reads
+fgrep -wf $id.subset.reads $id.sam > $id.subset.sam
 
 ```
 
