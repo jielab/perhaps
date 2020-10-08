@@ -94,7 +94,7 @@ java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.
 # #2. PerHAPS in LINUX, only the first 3 lines need to be changed
 
 ```
-id=NA19416 ## sample ID
+id=NA19146 ## sample ID
 bamfile=$id.bam ## the location of the BAM or CRAM file, indexed
 SNPs=19:44908684-44908822 ## the chr and positions of SNPs for phasing.
 
