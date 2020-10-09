@@ -19,7 +19,7 @@ sed -i 's/ /\t/g' subset.bed
 echo "rs2814778 rs12075 rs34599082 rs13962 rs429358 rs7412" | tr ' ' '\n' > subset.snps
 ```
 
-#1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created
+**#1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created**
 
 ```
 id=1466576
@@ -31,7 +31,7 @@ samtools addreplacerg -r ID:$id -r SM:$id -O BAM -o $id.bam $id.subset.bam
 samtools index -o $id.bam
 ```
 
-#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype
+**#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype**
 #full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
 
 ```
@@ -41,7 +41,7 @@ samtools index $id.final.cram
 samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 ```
 
-#1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap. 
+**#1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap** 
 #the following code uses chromosome 1 as an example.
 
 ```
@@ -64,7 +64,7 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 
 # #2. test other software
-#2.1 **whatshap** (https://whatshap.readthedocs.io/en/latest/)
+**#2.1 whatshap (https://whatshap.readthedocs.io/en/latest/)**
 
 ```
 conda config --add channels bioconda
@@ -78,10 +78,11 @@ done
 ```
 
 **Figure 1. screenshot of analysis output of WhatsHap**
+
 ![Figure 1](./Pictures/sshort1.png)
 
 
-#2.2 **HapCUT2** (https://github.com/vibansal/HapCUT2)
+**#2.2 HapCUT2 (https://github.com/vibansal/HapCUT2)**
 
 ```
 #the VCF and BAM files need to be on the same genome build (such as GRCh38)
@@ -94,6 +95,7 @@ done
 ```
 
 **Figure 2. screenshot of analysis output of HapCUT2**
+
 ![Figure 2](./Pictures/sshort2.png)
 
 
@@ -108,10 +110,12 @@ done
 ```
 
 **Figure 3. screenshot of analysis output of SmartPhase**
+
 ![Figure 3](./Pictures/sshort3.png)
 
 
 **Figure 4. IGV view for the APOE region of sample 1687346 from G1K**
+
 ![Figure 4](./Pictures/sshort4.png)
 
 
@@ -174,11 +178,11 @@ Then, click perhaps_gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
-![Figure 1](./Pictures/gui_1.png)
+![Figure 5](./Pictures/gui_1.png)
 
-![Figure 2](./Pictures/gui_2.png)
+![Figure 6](./Pictures/gui_2.png)
 
-![Figure 3](./Pictures/gui_3.png)
+![Figure 7](./Pictures/gui_3.png)
 
 
 !! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
@@ -188,7 +192,7 @@ Below are the screenshots of the GUI version.
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
-![Figure 3](./Pictures/Figure1S.JPG)
+![Figure 8](./Pictures/Figure1S.JPG)
 
 
 
@@ -214,7 +218,7 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 
 Run perhaps.R to generate the following plot
 
-![Figure 4](./Pictures/figure2.png)
+![Figure 9](./Pictures/figure2.png)
 
 
 
