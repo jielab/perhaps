@@ -70,25 +70,47 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 conda config --add channels bioconda
 conda config --add channels conda-forge
 conda install whatshap nomkl
-whatshap phase -o phased.vcf --no-reference NA20525.vcf.gz NA20525.bam
+
+for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
+  whatshap phase -o $id.whatshap.vcf --no-reference $id.vcf.gz $id.bam
+done
+
 ```
+
+Figure 1. screenshot of analysis output of WhatsHap
+![Figure 1](./Pictures/sshort1.png)
+
 
 #2.2 HapCUT2: https://github.com/vibansal/HapCUT2
 
 ```
 #the VCF and BAM files need to be on the same genome build (such as GRCh38)
-id=NA20525
-HapCUT2/build/extractHAIRS --bam $id.wgs.subset.bam --VCF $id.vcf  --out $id.fragment
-HapCUT2/build/HAPCUT2 --fragments $id.fragment --VCF $id.vcf --output $id.hap
+
+for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
+  extractHAIRS --bam $id.bam --VCF $id.vcf --out $id.fragment
+  HAPCUT2 --VCF $id.vcf --fragments $id.fragment --output $id.hap
+done
+
 
 ```
+Figure 2. screenshot of analysis output of HapCUT2
+![Figure 2](./Pictures/sshort2.png)
+
 
 #2.3 Smart-Phase: https://github.com/paulhager/smart-phase
 
 ```
-java -jar smartPhase.jar -a NA20525.vcf.gz -r NA20525.loc.bam -p NA20525 -g loc.bed \
- -m 60 -x -t -vcf -c 0.1 -o NA20525.tsv
+for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
+  java -jar /mnt/d/software_lin/smart-phase/smartPhase.jar -a $id.vcf.gz -p $id \
+      -g apoe.b38.bed -r $id.bam -m 60 -x -vcf -c 0.1 -o $id.tsv  
+done 
+
 ```
+Figure 3. screenshot of analysis output of SmartPhase
+![Figure 3](./Pictures/sshort3.png)
+
+Figure 4. IGV view for the APOE region of sample 1687346 from G1K
+![Figure 4](./Pictures/sshort4.png)
 
 
 # #2. PerHAPS in LINUX, only the first 3 lines need to be changed
