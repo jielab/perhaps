@@ -81,7 +81,7 @@ done
 
 **Figure 1. screenshot of analysis output of WhatsHap**
 
-![Figure 1](./Pictures/sshort1.png)
+![Figure 1](./Pictures/sshot1.png)
 
 
 **#2.2 HapCUT2 (https://github.com/vibansal/HapCUT2)**
@@ -98,7 +98,7 @@ done
 
 **Figure 2. screenshot of analysis output of HapCUT2**
 
-![Figure 2](./Pictures/sshort2.png)
+![Figure 2](./Pictures/sshot2.png)
 
 
 #2.3 **Smart-Phase** (https://github.com/paulhager/smart-phase)
@@ -113,12 +113,12 @@ done
 
 **Figure 3. screenshot of analysis output of SmartPhase**
 
-![Figure 3](./Pictures/sshort3.png)
+![Figure 3](./Pictures/sshot3.png)
 
 
 **Figure 4. IGV view for the APOE region of sample 1687346 from G1K**
 
-![Figure 4](./Pictures/sshort4.png)
+![Figure 4](./Pictures/sshot4.png)
 
 
 # #2. PerHAPS in LINUX, only the first 3 lines need to be changed
