@@ -118,7 +118,7 @@ done
 
 **Figure 4. IGV view for the APOE region of sample 1687346 from G1K**
 
-![Figure 4](./Pictures/sshot4.png)
+![Figure 4](./Pictures/sshot4.jpg)
 
 
 # #2. PerHAPS in LINUX, only the first 3 lines need to be changed
