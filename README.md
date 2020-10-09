@@ -32,9 +32,11 @@ samtools index -o $id.bam
 ```
 
 **#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype**
-#full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
+
 
 ```
+#full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
+
 id=NA20525
 wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$id.final.cram
 samtools index $id.final.cram
