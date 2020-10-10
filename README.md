@@ -121,7 +121,7 @@ done
 ![Figure 4](./Pictures/sshot4.jpg)
 
 
-# #2. PerHAPS in LINUX, only the first 3 lines need to be changed
+# #3. PerHAPS in LINUX, only the first 3 lines need to be changed
 
 ```
 id=NA19146 ## sample ID
@@ -166,13 +166,13 @@ fgrep -wf $id.subset.reads $id.sam > $id.subset.sam
 ```
 
 
-# #3. Windows Version of PERHAPS
+# #4. Windows Version of PERHAPS
 
 We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
 To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
 
 
-# #4. GUI version of PERHAPS
+# #5. GUI version of PERHAPS
 
 First, download perhaps_gui.exe and windows_tools directory. 
 Then, put them in the same directory (not putting perhaps_gui.exe into the windows_tools directory)
@@ -190,7 +190,7 @@ Below are the screenshots of the GUI version.
 !! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
 
 
-# #5. Visualize and validate the directly called haplotypes
+# #6. Visualize and validate the directly called haplotypes
 
 Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
  
@@ -198,7 +198,7 @@ Researchers could then open IGV (http://www.igv.org/) to visualize the genomic r
 
 
 
-# #6. Extract statistically phased haplotypes from UKB
+# #7. Extract statistically phased haplotypes from UKB
 
 ```
 gendir=XXX # the directory for the UKB haplotypes file
@@ -216,7 +216,7 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 ```
 
 
-# #7. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
+# #8. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
 
 Run perhaps.R to generate the following plot
 
@@ -224,7 +224,7 @@ Run perhaps.R to generate the following plot
 
 
 
-# #8. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
+# #9. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
 
 The UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
