@@ -218,7 +218,13 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 
 # #8. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
 
-Run perhaps.R to generate the following plot
+```
+assuming data frame "dat" has 3 variables (apoe, cnt_min, concordant), use the following R code to generate a comparison plot
+
+p <- ggboxplot(dat, x="apoe", y="cnt_min", color="concordant", notch=F, ylim=c(0,50), xlab="APOE derived from WES paired reads", ylab="Paired reads of the minor haplotype", outlier.shape=NA, font.label=list(size=100, face="bold"), size=1.5, palette="jco", add="none") # outlier.shape=NA,
+p + font("xlab", size=16) + font("ylab", size=16) + font("xy.text", size=16, face="bold") +
+	stat_compare_means(aes(label=..p.format.., group=concordant), method="wilcox.test", label.y=50)
+```
 
 ![Figure 9](./Pictures/figure2.png)
 
