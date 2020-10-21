@@ -3,125 +3,30 @@ A new and simple approach to directly call haplotypes from short-read, paired-en
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
-The technical bottleneck in direct haplotype calling from short-read sequencing lies in the length of sequenced DNA fragments, often too short to include two or multiple variable nucleotide positions that define the haplotype of interest. Indeed, while sequencing reads length in UKBB WES data is 76bp, the two APOE SNPs (rs7412 and rs429358), defining the common APOE polymorphism, are located 138 bp apart. We pieced short reads by utilizing their labels to generate a composite haplotype longer than 138bp. For illustraton purpose, we downloaded the WES data of two samples: HG01173 NA20525.
+Please cite: Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data. Briefings in Bioinformatics. DOI:10.1093/bib/bbaa320
 
 
 
 # Steps:
 
-# #1. download sequencing data and extract regions of interest
+# #1. Download sequencing data and extract regions of interest
 
 ```
-samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
-echo "1 159204012 159206500 ACKR1" > subset.bed
-echo "19 44905781 44909393 APOE" >> subset.bed
-sed -i 's/ /\t/g' subset.bed
-echo "rs2814778 rs12075 rs34599082 rs13962 rs429358 rs7412" | tr ' ' '\n' > subset.snps
-```
-
-**#1.1 download UKB WES data for sample 1466576, an example for APOE haplotype (Figure 1). assuming .ukbkey file created**
-
-```
-id=1466576
-echo -e "19416\nXXXXXX" > .ukbkey # XXXX is the UKB data key 
-echo -e "$id 23163_0_0\n1466576 23164_0_0" > sample.id
-ukbfetch -bsample.id
-samtools view -L subset.bed -O BAM -o $id.subset.bam $id.cram
-samtools addreplacerg -r ID:$id -r SM:$id -O BAM -o $id.bam $id.subset.bam
-samtools index -o $id.bam
-```
-
-**#1.2 download G1K WGS data for sample NA20525, an example for ACKR1 haplotype**
-
-
-```
-#full G1K WGS data at https://www.internationalgenome.org/data-portal/data-collection/30x-grch38 
 
 id=NA20525
 wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$id.final.cram
 samtools index $id.final.cram
+samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
+
+echo "1 159204012 159206500 ACKR1" > subset.bed
+echo "19 44905781 44909393 APOE" >> subset.bed
+sed -i 's/ /\t/g' subset.bed
 samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
-```
-
-**#1.3 download G1K VCF file, as needed by some other phasing programs such as WhatsHap** 
-#the following code uses chromosome 1 as an example.
-
-```
-wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-mv ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz chr1.vcf.gz
-seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
-
-# rename chromosome to add "chr" prefix, if needed
-bcftools annotate chr1.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
-
-# convert from build 37 positions to build 38 positions, if needed
-gatk --java-options "-Xmx6g" LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz \
-	-C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
-
-# create a small VCF subset, keeping only those samples of interest.
-echo "NA20525" > sample.keep
-plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
 
 ```
 
 
-# #2. test other software
-**#2.1 whatshap (https://whatshap.readthedocs.io/en/latest/)**
-
-```
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda install whatshap nomkl
-
-for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
-  whatshap phase -o $id.whatshap.vcf --no-reference $id.vcf.gz $id.bam
-done
-
-```
-
-**Figure 1. screenshot of analysis output of WhatsHap**
-
-![Figure 1](./Pictures/sshot1.png)
-
-
-**#2.2 HapCUT2 (https://github.com/vibansal/HapCUT2)**
-
-```
-#the VCF and BAM files need to be on the same genome build (such as GRCh38)
-
-for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
-  extractHAIRS --bam $id.bam --VCF $id.vcf --out $id.fragment
-  HAPCUT2 --VCF $id.vcf --fragments $id.fragment --output $id.hap
-done
-
-```
-
-**Figure 2. screenshot of analysis output of HapCUT2**
-
-![Figure 2](./Pictures/sshot2.png)
-
-
-#2.3 **Smart-Phase** (https://github.com/paulhager/smart-phase)
-
-```
-for id in 1057330 1466576 1687346 1892144 2120102 2120890 5777009; do
-  java -jar /mnt/d/software_lin/smart-phase/smartPhase.jar -a $id.vcf.gz -p $id \
-      -g apoe.b38.bed -r $id.bam -m 60 -x -vcf -c 0.1 -o $id.tsv  
-done 
-
-```
-
-**Figure 3. screenshot of analysis output of SmartPhase**
-
-![Figure 3](./Pictures/sshot3.png)
-
-
-**Figure 4. IGV view for the APOE region of sample 1687346 from G1K**
-
-![Figure 4](./Pictures/sshot4.jpg)
-
-
-# #3. PerHAPS in LINUX, only the first 3 lines need to be changed
+# #2. Linux version, only the first 3 lines need to be changed
 
 ```
 id=NA19146 ## sample ID
@@ -166,17 +71,19 @@ fgrep -wf $id.subset.reads $id.sam > $id.subset.sam
 ```
 
 
-# #4. Windows Version of PERHAPS
+# #3. Windows and GUI version
 
-We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
-To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
-
-
-# #5. GUI version of PERHAPS
-
+The Windows version includes awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
 First, download perhaps_gui.exe and windows_tools directory. 
 Then, put them in the same directory (not putting perhaps_gui.exe into the windows_tools directory)
-Then, click perhaps_gui.exe to run the GUI version.
+
+
+The Windows version could also be called from the Windwos command terminal, as shown in the following example command.
+```
+python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737
+```
+
+Click perhaps_gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
@@ -190,47 +97,18 @@ Below are the screenshots of the GUI version.
 !! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
 
 
-# #6. Visualize and validate the directly called haplotypes
+# #4. Visualize and validate the directly called haplotypes
 
-Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
+PerHAPS outputs a subset of the input BAM file that only contains paired short reads that are informative for the input haplotype.
+Users could use IGV (http://www.igv.org/) to visualize the input BAM file and the output subset BAM file. 
  
 ![Figure 8](./Pictures/Figure1S.JPG)
 
 
 
-# #7. Extract statistically phased haplotypes from UKB
+# #5. Scripts for processing the UKB data
 
-```
-gendir=XXX # the directory for the UKB haplotypes file
-snps="rs429358 rs7412"
-chr=19; begin=44908684; end=44908822 # GRCh38 positions for two SNPs that define the APOE haplotype
-
-###. extract haplotype from phased data ###
-echo $snps | tr ' ' '\n' > snps.txt
-
-plink2 --pfile $gendir/hap/chr$chr --extract snps.txt --export vcf id-paste=iid bgz --out hap; tabix hap.vcf.gz
-zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
-sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
-sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
-
-```
-
-
-# #8. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
-
-```
-assuming data frame "dat" has 3 variables (apoe, cnt_min, concordant), use the following R code to generate a comparison plot
-
-p <- ggboxplot(dat, x="apoe", y="cnt_min", color="concordant", notch=F, ylim=c(0,50), xlab="APOE derived from WES paired reads", ylab="Paired reads of the minor haplotype", outlier.shape=NA, font.label=list(size=100, face="bold"), size=1.5, palette="jco", add="none") # outlier.shape=NA,
-p + font("xlab", size=16) + font("ylab", size=16) + font("xy.text", size=16, face="bold") +
-	stat_compare_means(aes(label=..p.format.., group=concordant), method="wilcox.test", label.y=50)
-```
-
-![Figure 9](./Pictures/figure2.png)
-
-
-
-# #9. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
+#5.1. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
 
 The UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
@@ -281,4 +159,39 @@ for dat in `ls list*`; do  # to loop through all the list* files generated by th
 done
 
 ```
+
+#5.2. Extract the APOE haplotype from UKB phased PGEN file
+
+```
+gendir=XXX # the directory for the UKB haplotypes file
+snps="rs429358 rs7412"
+chr=19; begin=44908684; end=44908822 # GRCh38 positions for two SNPs that define the APOE haplotype
+
+###. extract haplotype from phased data ###
+echo $snps | tr ' ' '\n' > snps.txt
+
+plink2 --pfile $gendir/hap/chr$chr --extract snps.txt --export vcf id-paste=iid bgz --out hap; tabix hap.vcf.gz
+zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
+sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
+sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
+
+```
+
+
+#5.3. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
+
+assuming "dat" has 3 variables (apoe, cnt_min, concordant), use the following R code to generate a comparison plot
+
+```
+
+p <- ggboxplot(dat, x="apoe", y="cnt_min", color="concordant", notch=F, ylim=c(0,50), xlab="APOE derived from WES paired reads", ylab="Paired reads of the minor haplotype", outlier.shape=NA, font.label=list(size=100, face="bold"), size=1.5, palette="jco", add="none") # outlier.shape=NA,
+p + font("xlab", size=16) + font("ylab", size=16) + font("xy.text", size=16, face="bold") +
+	stat_compare_means(aes(label=..p.format.., group=concordant), method="wilcox.test", label.y=50)
+```
+
+![Figure 9](./Pictures/figure2.png)
+
+
+
+
 
