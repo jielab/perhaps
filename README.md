@@ -106,9 +106,28 @@ Users could use IGV (http://www.igv.org/) to visualize the input BAM file and th
 
 
 
-# #5. Scripts for processing the UKB data
+# #5. Testing other phasing software
+align VCF and BAM files to the same genome build
 
-#5.1. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
+```
+id=NA20525 # an example sample from G1K
+  
+# whatshap (https://whatshap.readthedocs.io/en/latest/)
+  whatshap phase -o $id.whatshap.vcf --no-reference $id.vcf.gz $id.bam
+
+# HapCUT2 (https://github.com/vibansal/HapCUT2)**	
+  extractHAIRS --bam $id.bam --VCF $id.vcf --out $id.fragment
+  HAPCUT2 --VCF $id.vcf --fragments $id.fragment --output $id.hap
+
+# Smart-Phase (https://github.com/paulhager/smart-phase)
+  java -jar smartPhase.jar -a $id.vcf.gz -p $id -g apoe.b38.bed -r $id.bam -m 60 -x -vcf -c 0.1 -o $id.tsv  
+
+```
+
+
+# #6. Scripts for processing the UKB data
+
+#6.1. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
 
 The UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
@@ -160,7 +179,7 @@ done
 
 ```
 
-#5.2. Extract the APOE haplotype from UKB phased PGEN file
+#6.2. Extract the APOE haplotype from UKB phased PGEN file
 
 ```
 gendir=XXX # the directory for the UKB haplotypes file
@@ -178,7 +197,7 @@ sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.
 ```
 
 
-#5.3. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
+#6.3. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
 
 assuming "dat" has 3 variables (apoe, cnt_min, concordant), use the following R code to generate a comparison plot
 
