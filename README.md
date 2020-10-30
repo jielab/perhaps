@@ -1,131 +1,135 @@
-# PERHAPS (Paired-End short Reads-based HAPlotyping from next-generation Sequencing data), is a new and simple approach to directly call haplotypes from short-read, paired-end Whole Exome Sequencing (WES) data. 
+# PerHAPS (Paired-End Reads based HAPlotyping for Sequencing)
+A new and simple approach to directly call haplotypes from short-read, paired-end next generation sequencing data. 
 Author: Jie Huang, MD, PhD, Department of Global Health, Peking University School of Public Health
 
 
-The technical bottleneck in direct haplotype calling from short-read sequencing lies in the length of sequenced DNA fragments, often too short to include two or multiple variable nucleotide positions that define the haplotype of interest. Indeed, while sequencing reads length in UKBB WES data is 76bp, the two APOE SNPs (rs7412 and rs429358), defining the common APOE polymorphism, are located 138 bp apart. We pieced short reads by utilizing their labels to generate a composite haplotype longer than 138bp. For illustraton purpose, we downloaded the WES data of two samples: HG01173 NA20525.
+Please cite: Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data. Briefings in Bioinformatics. DOI:10.1093/bib/bbaa320
 
 
 
 # Steps:
 
-# #1. Download 1000 genomes sequencing data
-start from 1000 genomes project main page https://www.internationalgenome.org. 
-Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
-Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
-The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples. 
-The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples. 
-Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
+# #1. Download sequencing data and extract regions of interest
 
 ```
 
-# create a 2genes.bed file with the following two rows, tab separated.
-chr1    159204012       159206500       ACKR1
-chr19   44905781        44909393        APOE
+id=NA20525
+wget ftp.sra.ebi.ac.uk/vol1/run/ERR323/ERR3239807/$id.final.cram
+samtools index $id.final.cram
+samtools view -H XXX.cram | grep "SN:" | head -25 # check if the target BAM file XXX.cram has "chr" prefix
 
-# run SAMTOOLS to extract the two genomic regions and create a new 2gene.bam file
-samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
+echo "1 159204012 159206500 ACKR1" > subset.bed
+echo "19 44905781 44909393 APOE" >> subset.bed
+sed -i 's/ /\t/g' subset.bed
+samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 
 ```
 
 
-# #2. LINUX version of PERHAPS
+# #2. Linux version, only the first 3 lines need to be changed
 
 ```
-
-## only the first 3 lines need to be changed
-IID=NA20525 ## sample ID
-rawfile=../BAM/$IID.bam ## the location of the BAM or CRAM file, indexed
-SNPs=1:159205564-159205704-159205737 ## the chr and positions of SNPs for directy haplotype detection.
+id=NA19146 ## sample ID
+bamfile=$id.bam ## the location of the BAM or CRAM file, indexed
+SNPs=19:44908684-44908822 ## the chr and positions of SNPs for phasing.
 
 chr=${SNPs/:*/} # extract "chr" from the "SNPs" defined above 
 pos=${SNPs/*:/} # extract "positions" of the "SNPs" defined above 
-samtools view -O SAM -o $IID.sam $rawfile # convert the BAM/CRAM file to SAM format (txt format)   
-readlen=`awk 'NR==1 {printf length($10)}' $IID.sam`  # find the read length of the sequencing data
+samtools view -O SAM -o $id.sam $bamfile chr$chr # extract the specified CHR and convert to SAM format   
+readlen=`awk 'NR==1 {printf length($10)}' $id.sam`  # find the read length of the sequencing data
 
 # remove reads with soft sequencing, extract first 10 fields
-cut -f 1-10 $IID.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' > $IID.sam.paired 
+cut -f 1-10 $id.sam | awk '$6 !~/S/ {if ($1 in reads) print reads[$1]" "$0; reads[$1]=$0}' > $id.sam.paired 
 
 # sanity check of haplotype size range formed by paired reads
-awk '{if ($9<0) print -$9; else print $9}' $IID.sam.paired | uniq | sort -n | uniq  > hap.len 
+awk '{if ($9<0) print -$9; else print $9}' $id.sam.paired | uniq | sort -n | uniq  > hap.len 
 
 # this is the core script for PERHAPS
-awk -v readlen=$readlen -v c=$chr -v pos=$pos '$3=="chr"c {
-	printf NR" "$1" "
+awk -v readlen=$readlen -v pos=$pos '{
+	printf NR" "$1" ";
 	split(pos,pa,"-");
 	cnt=0; hap="";
 	for (i in pa) {
-		pos1=pa[i]-$4+1; pos2=pa[i]-$14+1;
+		pos1=pa[i]-$4+1; 
+		pos2=pa[i]-$14+1;
 		if (pos1>=1 && pos1<=readlen) { split($10,seq1,""); printf "-SNP"i"-left("seq1[pos1]")" };
 		if (pos2>=1 && pos2<=readlen) { split($20,seq2,""); printf "-SNP"i"-right("seq2[pos2]")" };
 		if ((pos1>=1 && pos1<=readlen) || (pos2>=1 && pos2<=readlen)) cnt++; else printf "<>NA"
 	};
 	print " "cnt
-}' $IID.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $IID.hap
+}' $id.sam.paired | sed -e 's/-left//g' -e 's/-right//g' | sort -k 4,4nr -k 1,1n > $id.hap
 
 
 # report the haplotypes that include all input SNPs
 num=`echo $SNPs |  awk '{print gsub("-","") +1}'`
-awk -v num=$num '$NF==num {$1=$2=""; print $0}' $IID.hap | sort | uniq -c
+awk -v num=$num '$NF==num {$1=$2=""; print $0}' $id.hap | sort | uniq -c
 
 # create a subset SAM file that only includes the reads that form the haplotype mentioned above, for IGV visualization
-awk -v num=$num '$NF==num {print $2}' $IID.hap > $IID.subset.reads
-fgrep -wf $IID.subset.reads $IID.sam > $IID.subset.sam
+awk -v num=$num '$NF==num {print $2}' $id.hap > $id.subset.reads
+fgrep -wf $id.subset.reads $id.sam > $id.subset.sam
 
 ```
 
 
-# #3. Windows Version of PERHAPS
+# #3. Windows and GUI version
 
-We also developed a script that could be run on Windows OS. The tools including awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
-To run a test, you can input `python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737` on Windows cmd.
+The Windows version includes awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe are needed, which are put under the windows-tools folder.
+First, download perhaps_gui.exe and windows_tools directory. 
+Then, put them in the same directory (not putting perhaps_gui.exe into the windows_tools directory)
 
 
-# #4. GUI version of PERHAPS.
+The Windows version could also be called from the Windwos command terminal, as shown in the following example command.
+```
+python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737
+```
 
-After putting windows_tools directory in the same directory, then click perhaps.gui.exe to run the GUI version.
+Click perhaps_gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
-![Figure 1](./Pictures/gui_1.png)
+![Figure 5](./Pictures/gui_1.png)
 
-![Figure 2](./Pictures/gui_2.png)
+![Figure 6](./Pictures/gui_2.png)
 
-![Figure 3](./Pictures/gui_3.png)
+![Figure 7](./Pictures/gui_3.png)
 
-# #5. Visualize and validate the directly called haplotypes.
 
-Researchers could then open IGV (http://www.igv.org/) to visualize the genomic region in study and also visualize the directly called haplotype
+!! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
+
+
+# #4. Visualize and validate the directly called haplotypes
+
+PerHAPS outputs a subset of the input BAM file that only contains paired short reads that are informative for the input haplotype.
+Users could use IGV (http://www.igv.org/) to visualize the input BAM file and the output subset BAM file. 
  
-![Figure 3](./Pictures/Figure1S.JPG)
+![Figure 8](./Pictures/Figure1S.JPG)
 
 
 
-# #6. extract phased haplotypes from PGEN file (for UKB dataset)
-
-```
-gendir=XXX # the directory for the UKB haplotypes file
-snps="rs429358 rs7412"
-chr=19; begin=44908684; end=44908822 # GRCh38 positions for two SNPs that define the APOE haplotype
-
-###. extract haplotype from phased data ###
-echo $snps | tr ' ' '\n' > snps.txt
-
-plink2 --pfile $gendir/hap/chr$chr --extract snps.txt --export vcf id-paste=iid bgz --out hap; tabix hap.vcf.gz
-zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
-sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
-sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
+# #5. Testing other phasing software
+align VCF and BAM files to the same genome build
 
 ```
+id=NA20525 # an example sample from G1K
+  
+# whatshap (https://whatshap.readthedocs.io/en/latest/)
+  whatshap phase -o $id.whatshap.vcf --no-reference $id.vcf.gz $id.bam
+
+# HapCUT2 (https://github.com/vibansal/HapCUT2)**	
+  extractHAIRS --bam $id.bam --VCF $id.vcf --out $id.fragment
+  HAPCUT2 --VCF $id.vcf --fragments $id.fragment --output $id.hap
+
+# Smart-Phase (https://github.com/paulhager/smart-phase)
+  java -jar smartPhase.jar -a $id.vcf.gz -p $id -g apoe.b38.bed -r $id.bam -m 60 -x -vcf -c 0.1 -o $id.tsv  
+
+```
 
 
-# #7. run Perhaps.R and more analyses to explore the haplotypes
+# #6. Scripts for processing the UKB data
 
-![Figure 4](./Pictures/figure2.png)
+#6.1. Download and extract the APOE gene region of UKB WES files (N ~ 50,000)
 
-
-
-# #8. download and extract ~50,000 WES data (for UKB dataset)
-the UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
+The UKB server allows no more than 10 jobs to download the WES data simultaneously for each approved project. 
 Therefore, to download ~50,000 WES samples, we designed a strategy to put create ~500 list files, each containing links for 100 WES files.
 Then we use LSF to run 9 ukbgene jobs in a batch, and put the other jobs in batches of 9 jobs, and waiting on the queue.
 To save disk space, we delete the downloaded raw genotypic data after extracting the target regions.
@@ -174,4 +178,39 @@ for dat in `ls list*`; do  # to loop through all the list* files generated by th
 done
 
 ```
+
+#6.2. Extract the APOE haplotype from UKB phased PGEN file
+
+```
+gendir=XXX # the directory for the UKB haplotypes file
+snps="rs429358 rs7412"
+chr=19; begin=44908684; end=44908822 # GRCh38 positions for two SNPs that define the APOE haplotype
+
+###. extract haplotype from phased data ###
+echo $snps | tr ' ' '\n' > snps.txt
+
+plink2 --pfile $gendir/hap/chr$chr --extract snps.txt --export vcf id-paste=iid bgz --out hap; tabix hap.vcf.gz
+zcat hap.vcf.gz | awk '$1 !~/##/' | datamash -W transpose > hap.tmp
+sed '1,9d; s/|/ /g' hap.tmp | awk '{print $1, $2$4, $3$5}' > hap.txt
+sed 's/ 00/ e1/g; s/ 10/ e2/g; s/ 11/ e3/g; s/ 01/ e4/g; s/ //2' hap.txt > apoe.hap.txt
+
+```
+
+
+#6.3. Compare PERHAPS detected haplotypes vs. statistically phased haplotypes
+
+assuming "dat" has 3 variables (apoe, cnt_min, concordant), use the following R code to generate a comparison plot
+
+```
+
+p <- ggboxplot(dat, x="apoe", y="cnt_min", color="concordant", notch=F, ylim=c(0,50), xlab="APOE derived from WES paired reads", ylab="Paired reads of the minor haplotype", outlier.shape=NA, font.label=list(size=100, face="bold"), size=1.5, palette="jco", add="none") # outlier.shape=NA,
+p + font("xlab", size=16) + font("ylab", size=16) + font("xy.text", size=16, face="bold") +
+	stat_compare_means(aes(label=..p.format.., group=concordant), method="wilcox.test", label.y=50)
+```
+
+![Figure 9](./Pictures/figure2.png)
+
+
+
+
 
