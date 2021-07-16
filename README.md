@@ -87,11 +87,11 @@ Click perhaps_gui.exe to run the GUI version.
 The default value is pre-filled, and users only need to click the "submit" button to get the same results as above.
 Below are the screenshots of the GUI version.
  
-![Figure 5](./Pictures/gui_1.png)
+![Figure 5](./images/gui_1.png)
 
-![Figure 6](./Pictures/gui_2.png)
+![Figure 6](./images/gui_2.png)
 
-![Figure 7](./Pictures/gui_3.png)
+![Figure 7](./images/gui_3.png)
 
 
 !! If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.
@@ -102,7 +102,7 @@ Below are the screenshots of the GUI version.
 PerHAPS outputs a subset of the input BAM file that only contains paired short reads that are informative for the input haplotype.
 Users could use IGV (http://www.igv.org/) to visualize the input BAM file and the output subset BAM file. 
  
-![Figure 8](./Pictures/Figure1S.JPG)
+![Figure 8](./images/Figure1S.JPG)
 
 
 
