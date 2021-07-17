@@ -1,7 +1,7 @@
 
 # PerHAPS (Paired-End Reads HAPlotyping for Sequencing)
 
-<br/><br/>
+<br/>
 
 
 # #1. Download
@@ -21,7 +21,7 @@ sed -i 's/ /\t/g' subset.bed
 samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 ```
 
-<br/><br/>
+<br/>
 
 
 # #2. RUN
@@ -42,7 +42,7 @@ python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737*
 
 *If users could not see the above images in browser,  this is due to "DNS cache pollution". One short term fix for Windows users is to replace the "hosts" file (usually in "C:\Windows\System32\drivers\etc\hosts") with the "hosts" file posted on this site.*
 
-<br/><br/>
+<br/>
 
 
 # #3. Visualize
@@ -53,7 +53,7 @@ python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737*
 ![Figure 8](./images/Figure1S.JPG)
 
 
-<br/><br/>
+<br/>
 
 
 # #4. Compare
@@ -74,7 +74,7 @@ id=NA20525 # an example sample from G1K
 
 ```
 
-<br/><br/>
+<br/>
 
 
 ## Contact & Cite
