@@ -74,10 +74,12 @@ id=NA20525 # an example sample from G1K
 
 ```
 
+<br/><br/>
+
 
 ## Contact & Cite
 
-> - ### Contact: [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
-> - ### Cite: 2020. Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. [PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data](https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bbaa320/6025504) Briefings in Bioinformatics
+> - ### [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
+> - ### 2020. Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. [PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data](https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bbaa320/6025504) Briefings in Bioinformatics
 
 
