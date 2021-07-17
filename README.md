@@ -1,5 +1,5 @@
 
-## PerHAPS (Paired-End Reads HAPlotyping for Sequencing)
+# PerHAPS (Paired-End Reads HAPlotyping for Sequencing)
 
 <br/><br/>
 
@@ -7,7 +7,7 @@
 # #1. Download
 
 > - ### Download perhaps_gui.exe and a few public tools (awk.exe, cut.exe, samtools.exe, sort.exe, uniq.exe ) into the "windows_tools" directory. 
-> - #### Download example data
+> - ### Download example data
 
 ```
 id=NA20525
@@ -28,10 +28,10 @@ samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 > ### Linux version: Run "perhaps.sh" under "scripts" folder. Only the first 3 lines need to be updated.
 > ### Windows GUI version
 > > - ### Click perhaps_gui.exe to run the GUI version. The default value is pre-filled, and users only need to click the "submit" button.
-> > - ### The Windows version could also be called from the Windwos command terminal, by typing *python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737*
-
-
-## Screenshots of the GUI version.
+> > - ### The Windows version could also be called from the Windwos command terminal
+```
+python perhaps.py -i NA20525 -d .\test-data -s 1:159205564-159205704-159205737*
+```
  
 ![Figure 5](./images/gui_1.png)
 
@@ -57,7 +57,7 @@ samtools view -L subset.bed -O BAM -o $id.subset.bam $id.final.cram
 
 
 # #4. Compare
-align VCF and BAM files to the same genome build
+> ## make sure that VCF and BAM files are aligned to the same genome build
 
 ```
 id=NA20525 # an example sample from G1K
@@ -77,7 +77,7 @@ id=NA20525 # an example sample from G1K
 
 ## Contact & Cite
 
-### Contact: [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
-### Cite: 2020. Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. [PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data](https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bbaa320/6025504) Briefings in Bioinformatics
+> - ### Contact: [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
+> - ### Cite: 2020. Jie Huang, Stefano Pallotti, Qianling Zhou, Marcus Kleber, Xiaomeng Xin, Daniel A. King, Valerio Napolioni. [PERHAPS: Paired-End short Reads-based HAPlotyping from next-generation Sequencing data](https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bbaa320/6025504) Briefings in Bioinformatics
 
 
